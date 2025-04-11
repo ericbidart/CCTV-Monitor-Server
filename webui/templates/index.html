@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CCTV Intelligence System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>System Dashboard</h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Cameras</h5>
+            </div>
+            <div class="card-body">
+                <h2 class="display-4 text-center">{{ cameras|length }}</h2>
+                <p class="text-center">Active Cameras</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('cameras') }}" class="btn btn-outline-primary">Manage Cameras</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Notifications</h5>
+            </div>
+            <div class="card-body">
+                <h2 class="display-4 text-center">
+                    {% set notification_count = 0 %}
+                    {% if config.notifications.email.enabled %}
+                        {% set notification_count = notification_count + 1 %}
+                    {% endif %}
+                    {% if config.notifications.push.enabled %}
+                        {% set notification_count = notification_count + 1 %}
+                    {% endif %}
+                    {{ notification_count }}
+                </h2>
+                <p class="text-center">Active Notification Methods</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('settings') }}" class="btn btn-outline-success">Configure Notifications</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">System Status</h5>
+            </div>
+            <div class="card-body">
+                <h2 class="display-4 text-center"><i class="bi bi-check-circle-fill text-success"></i></h2>
+                <p class="text-center">System Running</p>
+                <div class="d-grid">
+                    <button id="restartBtn" class="btn btn-outline-info">Restart System</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Recent Events</h5>
+            </div>
+            <div class="card-body">
+                {% if events %}
+                <div class="row">
+                    {% for event in events %}
+                    <div class="col-md-4">
+                        <div class="card event-card">
+                            <img src="{{ event.web_image_path }}" class="card-img-top event-image" alt="Event">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ event.type|capitalize }} Detected</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ event.camera }}</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        {{ event.timestamp }}
+                                    </small>
+                                </p>
+                                <div class="d-grid">
+                                    <a href="{{ event.web_image_path }}" target="_blank" class="btn btn-sm btn-outline-primary">View Full Image</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('events_page') }}" class="btn btn-outline-dark">View All Events</a>
+                </div>
+                {% else %}
+                <p class="text-center">No events detected yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('restartBtn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to restart the system?')) {
+            fetch('/api/restart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to restart system.');
+            });
+        }
+    });
+</script>
+{% endblock %}

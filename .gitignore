@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Logs and data
+logs/
+events/
+snapshots/
+
+# Configuration with sensitive data
+# Comment these out if you want to include them
+# config/system.json
+
+# Other
+.DS_Store
+.vscode/

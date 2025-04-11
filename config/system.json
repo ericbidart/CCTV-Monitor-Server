@@ -1,0 +1,42 @@
+{
+  "cameras": [
+    {
+      "name": "Shop Front",
+      "url": "rtsp://admin:ga94083124@192.168.15.201:554/cam/realmonitor?channel=1&subtype=0",
+      "enabled": true,
+      "fps": 5,
+      "detections": [
+        "person",
+        "vehicle",
+        "fire",
+        "face"
+      ]
+    }
+  ],
+  "notifications": {
+    "email": {
+      "enabled": false,
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "username": "ericbidart8@gmail.com",
+      "password": "phnj ygwy bdcy rjql",
+      "recipients": [
+        "support@aertechnology.ca"
+      ]
+    },
+    "push": {
+      "enabled": false,
+      "service": "firebase",
+      "api_key": ""
+    }
+  },
+  "storage": {
+    "event_retention_days": 30,
+    "max_disk_usage_gb": 50
+  },
+  "web_interface": {
+    "port": 8080,
+    "username": "admin",
+    "password": "change-me-immediately"
+  }
+}

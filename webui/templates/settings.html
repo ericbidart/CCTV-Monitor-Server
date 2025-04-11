@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - CCTV Intelligence System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>System Settings</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Web Interface Settings</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('settings_save') }}" method="post">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="port" class="form-label">Web Interface Port</label>
+                                <input type="number" class="form-control" id="port" name="port" 
+                                       value="{{ config.web_interface.port|default(8080) }}" min="1024" max="65535">
+                            </div>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       value="{{ config.web_interface.username|default('admin') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Leave blank to keep current password">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <h5>Web Interface Notes</h5>
+                                <ul>
+                                    <li>Changing the port will require a system restart</li>
+                                    <li>Password changes take effect immediately</li>
+                                    <li>For security, use a strong password</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Email Notification Settings</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="email_enabled" name="email_enabled"
+                                       {% if config.notifications.email.enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="email_enabled">Enable Email Notifications</label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="smtp_server" class="form-label">SMTP Server</label>
+                                <input type="text" class="form-control" id="smtp_server" name="smtp_server"
+                                       value="{{ config.notifications.email.smtp_server|default('') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="smtp_port" class="form-label">SMTP Port</label>
+                                <input type="number" class="form-control" id="smtp_port" name="smtp_port"
+                                       value="{{ config.notifications.email.smtp_port|default(587) }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email_username" class="form-label">SMTP Username</label>
+                                <input type="text" class="form-control" id="email_username" name="email_username"
+                                       value="{{ config.notifications.email.username|default('') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email_password" class="form-label">SMTP Password</label>
+                                <input type="password" class="form-control" id="email_password" name="email_password"
+                                       placeholder="Leave blank to keep current password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email_recipients" class="form-label">Recipients (comma separated)</label>
+                                <input type="text" class="form-control" id="email_recipients" name="email_recipients"
+                                       value="{{ config.notifications.email.recipients|join(', ')|default('') }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <h5>Email Setup Guide</h5>
+                                <p>To set up Gmail:</p>
+                                <ul>
+                                    <li>SMTP Server: smtp.gmail.com</li>
+                                    <li>SMTP Port: 587</li>
+                                    <li>Username: Your Gmail address</li>
+                                    <li>Password: Generate an App Password in Google Account settings</li>
+                                </ul>
+                                <p>For other providers, check their SMTP settings documentation.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Push Notification Settings</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="push_enabled" name="push_enabled"
+                                       {% if config.notifications.push.enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="push_enabled">Enable Push Notifications</label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="push_service" class="form-label">Push Service</label>
+                                <select class="form-select" id="push_service" name="push_service">
+                                    <option value="firebase" {% if config.notifications.push.service == 'firebase' %}selected{% endif %}>Firebase</option>
+                                    <option value="pushover" {% if config.notifications.push.service == 'pushover' %}selected{% endif %}>Pushover</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="push_api_key" class="form-label">API Key</label>
+                                <input type="password" class="form-control" id="push_api_key" name="push_api_key"
+                                       placeholder="Leave blank to keep current API key">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <h5>Push Notification Setup</h5>
+                                <p><strong>Firebase:</strong></p>
+                                <ol>
+                                    <li>Create a Firebase project at firebase.google.com</li>
+                                    <li>Set up Firebase Cloud Messaging</li>
+                                    <li>Copy your server key as the API key</li>
+                                </ol>
+                                <p><strong>Pushover:</strong></p>
+                                <ol>
+                                    <li>Create an account at pushover.net</li>
+                                    <li>Create an application and get your API key</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

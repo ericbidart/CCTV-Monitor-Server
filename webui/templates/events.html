@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Events - CCTV Intelligence System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>Detection Events</h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Event Filters</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{{ url_for('events_page') }}">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="camera" class="form-label">Camera</label>
+                            <select class="form-select" id="camera" name="camera">
+                                <option value="">All Cameras</option>
+                                {% for cam in cameras %}
+                                <option value="{{ cam }}" {% if camera_filter == cam %}selected{% endif %}>{{ cam }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="type" class="form-label">Detection Type</label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="">All Types</option>
+                                {% for type in event_types %}
+                                <option value="{{ type }}" {% if type_filter == type %}selected{% endif %}>{{ type|capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="per_page" class="form-label">Items Per Page</label>
+                            <select class="form-select" id="per_page" name="per_page">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if events %}
+        {% for event in events %}
+        <div class="col-md-4 mb-4">
+            <div class="card event-card">
+                <img src="{{ event.web_image_path }}" class="card-img-top event-image" alt="Event">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.type|capitalize }} Detected</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ event.camera }}</h6>
+                    <p class="card-text">
+                        <small class="text-muted">{{ event.timestamp }}</small>
+                    </p>
+                    <p class="card-text">
+                        Objects detected: {{ event.objects|length }}
+                    </p>
+                    <div class="d-grid">
+                        <a href="{{ event.web_image_path }}" target="_blank" class="btn btn-sm btn-outline-primary">View Full Image</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col">
+        <div class="alert alert-info text-center">
+            No events found matching the current filters.
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if events %}
+<nav aria-label="Event pagination">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('events_page', page=page-1, camera=camera_filter, type=type_filter) }}">Previous</a>
+        </li>
+        
+        {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('events_page', page=p, camera=camera_filter, type=type_filter) }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+        
+        <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('events_page', page=page+1, camera=camera_filter, type=type_filter) }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
