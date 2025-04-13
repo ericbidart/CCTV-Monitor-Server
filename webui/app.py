@@ -376,7 +376,103 @@ def api_restart():
     """API endpoint to restart the system."""
     # Implement system restart logic here
     return jsonify({"status": "success", "message": "System restart initiated"})
+@app.route('/security_zones/<camera_name>')
+@login_required
+def security_zones(camera_name):
+    """Security zones configuration page."""
+    try:
+        config = load_config()
+        cameras = config.get('cameras', [])
+        
+        # Find the specific camera
+        camera = next((cam for cam in cameras if cam.get('name') == camera_name), None)
+        if not camera:
+            flash(f'Camera "{camera_name}" not found')
+            return redirect(url_for('cameras'))
+            
+        # Get security zones for this camera
+        security_zones = camera.get('security_zones', [])
+        
+        return render_template('security_zones.html', 
+                              camera_name=camera_name, 
+                              camera=camera,
+                              security_zones=security_zones)
+    except Exception as e:
+        logger.error(f"Error loading security zones: {e}")
+        flash(f'Error: {str(e)}')
+        return redirect(url_for('cameras'))
 
+@app.route('/camera_snapshot/<camera_name>')
+@login_required
+def camera_snapshot(camera_name):
+    """Get a snapshot from the camera for zone configuration."""
+    try:
+        config = load_config()
+        cameras = config.get('cameras', [])
+        
+        # Find the specific camera
+        camera = next((cam for cam in cameras if cam.get('name') == camera_name), None)
+        if not camera:
+            return "Camera not found", 404
+            
+        # Try to get a snapshot
+        import cv2
+        cap = cv2.VideoCapture(camera.get('url'))
+        if not cap.isOpened():
+            return "Could not connect to camera", 500
+            
+        ret, frame = cap.read()
+        cap.release()
+        
+        if not ret:
+            return "Could not get frame from camera", 500
+            
+        # Save snapshot to a temporary file
+        snapshot_dir = Path("webui/static/img/snapshots")
+        os.makedirs(snapshot_dir, exist_ok=True)
+        snapshot_path = snapshot_dir / f"{camera_name}_snapshot.jpg"
+        cv2.imwrite(str(snapshot_path), frame)
+        
+        # Return the image
+        return send_from_directory("static/img/snapshots", f"{camera_name}_snapshot.jpg")
+    except Exception as e:
+        logger.error(f"Error getting camera snapshot: {e}")
+        return "Error getting snapshot", 500
+
+@app.route('/save_security_zones/<camera_name>', methods=['POST'])
+@login_required
+def save_security_zones(camera_name):
+    """Save security zones for a camera."""
+    try:
+        # Get zone data from form
+        zone_coordinates = request.form.get('zoneCoordinates')
+        if not zone_coordinates:
+            flash('No zone coordinates provided')
+            return redirect(url_for('security_zones', camera_name=camera_name))
+            
+        # Parse zones
+        zones = json.loads(zone_coordinates)
+        
+        # Update config
+        config = load_config()
+        cameras = config.get('cameras', [])
+        
+        for i, camera in enumerate(cameras):
+            if camera.get('name') == camera_name:
+                cameras[i]['security_zones'] = zones
+                break
+        
+        # Save updated config
+        if save_config(config):
+            flash('Security zones saved successfully')
+        else:
+            flash('Failed to save security zones')
+            
+        return redirect(url_for('security_zones', camera_name=camera_name))
+    except Exception as e:
+        logger.error(f"Error saving security zones: {e}")
+        flash(f'Error: {str(e)}')
+        return redirect(url_for('cameras'))
 # Run the app
 if __name__ == '__main__':
     # Get web interface port from config
