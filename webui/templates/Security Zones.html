@@ -1,0 +1,145 @@
+<!-- New file: webui/templates/security_zones.html -->
+{% extends "base.html" %}
+
+{% block title %}Security Zones - CCTV Intelligence System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>Security Zones Configuration</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Camera View</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="cameraView" class="position-relative">
+                    <img id="cameraSnapshot" src="{{ url_for('camera_snapshot', camera_name=camera_name) }}" class="img-fluid" alt="Camera Snapshot">
+                    
+                    <!-- Zone overlay will be drawn here -->
+                    <div id="zoneOverlay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Zone Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="zoneForm" action="{{ url_for('save_security_zones', camera_name=camera_name) }}" method="post">
+                    <div class="mb-3">
+                        <label for="zoneName" class="form-label">Zone Name</label>
+                        <input type="text" class="form-control" id="zoneName" name="zoneName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="zoneType" class="form-label">Zone Type</label>
+                        <select class="form-select" id="zoneType" name="zoneType">
+                            <option value="high_value">High Value Products</option>
+                            <option value="exit_monitoring">Exit Monitoring</option>
+                            <option value="restricted">Restricted Area</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Drawing Mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="drawingMode" id="drawingModeNew" checked>
+                            <label class="form-check-label" for="drawingModeNew">
+                                Draw New Zone
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="drawingMode" id="drawingModeEdit">
+                            <label class="form-check-label" for="drawingModeEdit">
+                                Edit Existing Zone
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button type="button" id="btnClearDrawing" class="btn btn-warning">Clear Drawing</button>
+                        <button type="button" id="btnAddZone" class="btn btn-primary">Add Zone</button>
+                    </div>
+                    
+                    <!-- Hidden field to store zone coordinates -->
+                    <input type="hidden" id="zoneCoordinates" name="zoneCoordinates">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Existing Zones</label>
+                        <div class="list-group" id="zoneList">
+                            {% for zone in security_zones %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ zone.name }}</strong>
+                                    <br>
+                                    <span class="badge bg-info">{{ zone.type }}</span>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-primary edit-zone" data-zone-id="{{ loop.index0 }}">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-danger delete-zone" data-zone-id="{{ loop.index0 }}">Delete</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Save All Zones</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // JavaScript for zone drawing functionality
+    // This would include polygon drawing on the camera image
+    // and management of zone coordinates
+    
+    // Sample code for demonstration
+    document.addEventListener('DOMContentLoaded', function() {
+        const cameraView = document.getElementById('cameraView');
+        const zoneOverlay = document.getElementById('zoneOverlay');
+        const zoneCoordinatesField = document.getElementById('zoneCoordinates');
+        
+        // Initialize zones from server data
+        const securityZones = {{ security_zones|tojson }};
+        
+        // Render existing zones
+        renderZones();
+        
+        function renderZones() {
+            // Clear overlay
+            zoneOverlay.innerHTML = '';
+            
+            // Render each zone
+            securityZones.forEach((zone, index) => {
+                const zoneElement = document.createElement('div');
+                zoneElement.className = 'security-zone';
+                zoneElement.dataset.zoneId = index;
+                
+                // Create SVG polygon
+                // This is simplified - would need more code to actually create
+                // an SVG polygon from the coordinates
+                
+                zoneOverlay.appendChild(zoneElement);
+            });
+        }
+        
+        // Save zones to hidden form field when submitting
+        document.getElementById('zoneForm').addEventListener('submit', function(e) {
+            zoneCoordinatesField.value = JSON.stringify(securityZones);
+        });
+    });
+</script>
+{% endblock %}
