@@ -474,6 +474,25 @@ def save_security_zones(camera_name):
         logger.error(f"Error saving security zones: {e}")
         flash(f'Error: {str(e)}')
         return redirect(url_for('cameras'))
+
+@app.route('/camera_edit/<camera_name>')
+@login_required
+def camera_edit(camera_name):
+    """Edit camera page."""
+    try:
+        config = load_config()
+        cameras = config.get('cameras', [])
+        
+        # Find the camera to edit
+        camera = next((cam for cam in cameras if cam.get('name') == camera_name), None)
+        if not camera:
+            flash(f'Camera "{camera_name}" not found')
+            return redirect(url_for('cameras'))
+            
+        return render_template('camera_edit.html', camera=camera)
+    except Exception as e:
+        logger.error(f"Error editing camera: {
+            
 # Run the app
 if __name__ == '__main__':
     # Get web interface port from config
