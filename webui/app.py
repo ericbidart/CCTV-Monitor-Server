@@ -376,6 +376,7 @@ def api_restart():
     """API endpoint to restart the system."""
     # Implement system restart logic here
     return jsonify({"status": "success", "message": "System restart initiated"})
+
 @app.route('/security_zones/<camera_name>')
 @login_required
 def security_zones(camera_name):
@@ -428,7 +429,7 @@ def camera_snapshot(camera_name):
             return "Could not get frame from camera", 500
             
         # Save snapshot to a temporary file
-        snapshot_dir = Path("webui/static/img/snapshots")
+        snapshot_dir = Path("static/img/snapshots")
         os.makedirs(snapshot_dir, exist_ok=True)
         snapshot_path = snapshot_dir / f"{camera_name}_snapshot.jpg"
         cv2.imwrite(str(snapshot_path), frame)
