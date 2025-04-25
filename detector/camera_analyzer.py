@@ -307,6 +307,59 @@ class CameraAnalyzer:
         self.threads = []
         logger.info("Camera analyzer stopped")
 
+    def cleanup_old_images(self, max_age_days=7, max_files=1000):
+    """
+    Clean up old detection images to prevent storage issues.
+    
+    Args:
+        max_age_days: Delete images older than this many days
+        max_files: Maximum number of image files to keep
+    """
+    try:
+        event_dir = Path("events")
+        if not event_dir.exists():
+            return
+            
+        # Get all image files
+        image_files = list(event_dir.glob("*.jpg"))
+        
+        # Sort by modification time (oldest first)
+        image_files.sort(key=lambda x: x.stat().st_mtime)
+        
+        # Calculate cutoff date
+        cutoff_time = time.time() - (max_age_days * 24 * 60 * 60)
+        
+        # Track how many files were deleted
+        deleted_count = 0
+        
+        # Delete old files and ensure we don't exceed max_files
+        for file_path in image_files:
+            should_delete = False
+            
+            # Check if file is older than max_age_days
+            if file_path.stat().st_mtime < cutoff_time:
+                should_delete = True
+                
+            # Check if we have too many files (leave room for new ones)
+            if len(image_files) - deleted_count > max_files:
+                should_delete = True
+                
+            if should_delete:
+                # Also delete corresponding JSON file if it exists
+                json_path = file_path.with_suffix('.json')
+                if json_path.exists():
+                    json_path.unlink()
+                    
+                # Delete the image
+                file_path.unlink()
+                deleted_count += 1
+                
+        if deleted_count > 0:
+            logger.info(f"Cleanup: Deleted {deleted_count} old image files")
+            
+    except Exception as e:
+        logger.error(f"Error cleaning up old images: {e}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Camera Analyzer")
