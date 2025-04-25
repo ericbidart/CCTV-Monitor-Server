@@ -37,12 +37,12 @@
                 <p><strong>Security Zones:</strong> 
                     {% if camera.security_zones %}
                     {{ camera.security_zones|length }}
-                    <a href="{{ url_for('security_zones', camera_name=camera.name) }}" class="btn btn-sm btn-outline-primary ms-2">
+                    <a href="/security_zones/{{ camera.name }}" class="btn btn-sm btn-outline-primary ms-2">
                         <i class="bi bi-gear-fill"></i> Configure
                     </a>
                     {% else %}
                     None
-                    <a href="{{ url_for('security_zones', camera_name=camera.name) }}" class="btn btn-sm btn-outline-primary ms-2">
+                    <a href="/security_zones/{{ camera.name }}" class="btn btn-sm btn-outline-primary ms-2">
                         <i class="bi bi-plus-lg"></i> Add Zones
                     </a>
                     {% endif %}
@@ -262,7 +262,7 @@
                 document.getElementById('edit_security_mode_theft').checked = 
                     cameraData.security_mode === 'theft_prevention';
                 
-                // Update security zones link
+                // Update security zones link with direct URL
                 const zonesLink = document.getElementById('edit_configure_security_zones');
                 zonesLink.href = `/security_zones/${encodeURIComponent(cameraData.name)}`;
                 
