@@ -84,7 +84,7 @@
                 <h5 class="modal-title">Add Camera</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ url_for('camera_add') }}" method="post">
+            <form action="/camera_add" method="post">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -161,7 +161,7 @@
                 <h5 class="modal-title">Edit Camera</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editCameraForm" action="{{ url_for('camera_edit_save') }}" method="post">
+            <form id="editCameraForm" action="/camera_edit_save" method="post">
                 <input type="hidden" id="edit_original_name" name="original_name">
                 <div class="modal-body">
                     <!-- Edit form fields - same as Add Camera but with id prefixed by "edit_" -->
