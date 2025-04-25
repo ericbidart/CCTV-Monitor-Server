@@ -38,5 +38,10 @@
     "port": 8080,
     "username": "admin",
     "password": "change-me-immediately"
+  },
+  "storage": {
+  "max_age_days": 7,
+  "max_files": 1000,
+  "cleanup_interval_hours": 1
   }
 }
