@@ -46,12 +46,9 @@ class CameraAnalyzer:
             raise
             
     def setup_models(self):
-        """Initialize detection models."""
+    """Initialize detection models."""
         try:
-            logger.info("Loading YOLOv8 model...")
-            # Load YOLOv8 model
-            self.model = YOLO("yolov8n.pt")  # Use small model for speed
-            logger.info("YOLOv8 model loaded successfully")
+            logger.info("Loading Phi-3.5 Vision model...")
             
         except Exception as e:
             logger.error(f"Error setting up models: {e}")
